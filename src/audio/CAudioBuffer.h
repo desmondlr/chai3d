@@ -97,7 +97,7 @@ public:
 public:
 
     //! This method sets a buffer by passing a pointer to the audio data and defines the data specifications.
-    bool setup(unsigned char* a_data, const unsigned int a_size, int a_frequency, bool a_stereo, unsigned short a_bitsPerSample);
+    bool setup(unsigned char* a_data, const unsigned int a_size, int a_frequency, unsigned short channel_count, unsigned short a_bitsPerSample);
 
     //! This method loads an audio file by passing the filename as argument.
     bool loadFromFile(const std::string& a_filename);
@@ -118,7 +118,7 @@ public:
     int getFrequency() { return (m_frequency); }
 
     //! This method returns __true__ if the audio data in in __stereo__ format, otherwise __false__.
-    bool getStereo() { return (m_stereo); }
+    bool getStereo() { return (m_channel_count == 2); }
 
     //! This method returns the sample format of the audio data.
     int getBitsPerSample() { return (m_bitsPerSample); }
@@ -170,8 +170,8 @@ protected:
     //! Audio data frequency.
     int m_frequency;
 
-    //! Audio data format (__stereo__ = __true__, __mono__ = __false__).
-    bool m_stereo;
+    //! Audio data channel count : the number of channels, valid answers are 1,2,4,6,7 and 8
+	unsigned short m_channel_count;
 
     //! Audio data resolution. Number of bits per sample (8 or 16).
     unsigned short m_bitsPerSample;

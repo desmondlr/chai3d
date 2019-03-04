@@ -66,7 +66,7 @@ namespace chai3d {
     \param  a_createAudioContext  Indicates if audio contexts should be created.
 */
 //==============================================================================
-cAudioDevice::cAudioDevice(bool a_createAudioContext)
+cAudioDevice::cAudioDevice(bool a_createAudioContext, char *device_name)
 {
     // initialize all variables
     m_createAudioContext = a_createAudioContext;
@@ -77,7 +77,7 @@ cAudioDevice::cAudioDevice(bool a_createAudioContext)
     m_device = NULL;
 
     // open device
-    open();
+    open(device_name);
 };
 
 
@@ -92,6 +92,26 @@ cAudioDevice::~cAudioDevice()
     close();
 };
 
+static int list_audio_devices(const ALCchar *devices, char *device_name)
+{
+	const ALCchar *device = devices, *next = devices + 1;
+	size_t len = 0;
+	int retVal = 0;
+	fprintf(stdout, "Devices list:\n");
+	fprintf(stdout, "----------\n");
+	while (device && *device != '\0' && next && *next != '\0') {
+		fprintf(stdout, "%s\n", device);
+		len = strlen(device);
+		device += (len + 1);
+		next += (len + 2);
+		if (device_name != NULL && strcmp(device, device_name)==0)
+		{
+			retVal = 100; //Found Specified Device
+		}
+	}
+	fprintf(stdout, "----------\n");
+	return retVal;
+}
 
 //==============================================================================
 /*!
@@ -100,12 +120,22 @@ cAudioDevice::~cAudioDevice()
     \return __true__ if no errors occurred, __false__ otherwise.
 */
 //==============================================================================
-bool cAudioDevice::open()
+bool cAudioDevice::open(char *device_name)
 {
+	int m_audioStatus = 0;
+
+	m_audioStatus = list_audio_devices(alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER),device_name);
     // open device
     if (m_device == NULL)
     {
-        m_device = static_cast<void*>(alcOpenDevice(NULL));
+		if (m_audioStatus == 100) //if specified device is found, open the specified device or open the generic devices
+		{
+			m_device = static_cast<void*>(alcOpenDevice(device_name));
+		}
+		else
+		{
+			m_device = static_cast<void*>(alcOpenDevice(NULL));
+		}
     }
     else
     {

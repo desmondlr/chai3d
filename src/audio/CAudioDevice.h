@@ -87,7 +87,7 @@ class cAudioDevice
 public:
 
     //! Constructor of cAudioDevice.
-    cAudioDevice(bool a_createAudioContext = true);
+    cAudioDevice(bool a_createAudioContext = true, char *device_name = NULL);
 
     //! Destructor of cAudioDevice.
     virtual ~cAudioDevice();
@@ -128,7 +128,7 @@ public:
 protected:
 
     //! This method opens this audio device context.
-    bool open();
+	bool open(char *device_name = NULL);
 
     //! This method closes this audio device context.
     bool close();

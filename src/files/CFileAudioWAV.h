@@ -76,7 +76,7 @@ namespace chai3d {
         unsigned char*& a_data,
         int* a_size,
         int* a_frequency,
-        bool* a_stereo,
+		unsigned short* channel_count,
         unsigned short* a_bitsPerSample);
 
 //@}

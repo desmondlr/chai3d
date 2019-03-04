@@ -71,7 +71,7 @@ cAudioBuffer::cAudioBuffer()
     m_buffer = 0;
     m_size = 0;
     m_frequency = 0;
-    m_stereo = false;
+	m_channel_count = 1;
     m_bitsPerSample = 8;
 
     // generate OpenAL buffer
@@ -108,13 +108,13 @@ cAudioBuffer::~cAudioBuffer()
     \param  a_data           Pointer to the audio data.
     \param  a_size           Audio data size in bytes.
     \param  a_frequency      Audio data frequency.
-    \param  a_stereo         __true__ for stereo, __false__ for mono.
+    \param  channel_count    #of channels available 1,2,4,6,7 and 8 are the valid values here.
     \param  a_bitsPerSample  Number of bits per sample (8 or 16).
 
     \return __true__ if the operation succeeds, __false__ otherwise.
 */
 //==============================================================================
-bool cAudioBuffer::setup(unsigned char* a_data, const unsigned int a_size, int a_frequency, bool a_stereo, unsigned short a_bitsPerSample)
+bool cAudioBuffer::setup(unsigned char* a_data, const unsigned int a_size, int a_frequency, unsigned short channel_count, unsigned short a_bitsPerSample)
 {
     // sanity check
     if (a_data == NULL)
@@ -132,7 +132,7 @@ bool cAudioBuffer::setup(unsigned char* a_data, const unsigned int a_size, int a
     m_data = a_data;
     m_size = a_size;
     m_frequency = a_frequency;
-    m_stereo = a_stereo;
+    //m_stereo = a_stereo;
     m_bitsPerSample = a_bitsPerSample;
 
     // mark the audio buffer as being owned externally,
@@ -148,21 +148,49 @@ bool cAudioBuffer::setup(unsigned char* a_data, const unsigned int a_size, int a
 
     // determine format
     ALenum format;
-    if (m_stereo)
-    {
-        if (m_bitsPerSample == 8)
-            format = AL_FORMAT_STEREO8;
-        else
-            format = AL_FORMAT_STEREO16;
-    }
-    else 
-    {
-        if (m_bitsPerSample == 8)
-            format = AL_FORMAT_MONO8;
-        else
-            format = AL_FORMAT_MONO16;
-    }
 
+
+	switch (channel_count)
+	{
+		case 1:	if (m_bitsPerSample == 8)
+					format = AL_FORMAT_MONO8;
+				else
+					format = AL_FORMAT_MONO16;
+				break;
+		case 2:	if (m_bitsPerSample == 8)
+				format = AL_FORMAT_STEREO8;
+					else
+				format = AL_FORMAT_STEREO16;
+				break;
+		case 4:	if (m_bitsPerSample == 8)
+				format = alGetEnumValue("AL_FORMAT_QUAD8");
+					else
+				format = alGetEnumValue("AL_FORMAT_QUAD16");
+				if (!format)
+					printf("No Support for 4 Channel Playback!\n");
+				break;
+		case 6:	if (m_bitsPerSample == 8)
+				format = alGetEnumValue("AL_FORMAT_51CHN8");
+					else
+				format = alGetEnumValue("AL_FORMAT_51CHN16");
+				if (!format)
+					printf("No Support for 6 Channel Playback!\n");
+				break;
+		case 7:	if (m_bitsPerSample == 8)
+				format = alGetEnumValue("AL_FORMAT_61CHN8");
+					else
+				format = alGetEnumValue("AL_FORMAT_61CHN16");
+				if (!format)
+					printf("No Support for 7 Channel Playback!\n");
+				break;
+		case 8:	if (m_bitsPerSample == 8)
+				format = alGetEnumValue("AL_FORMAT_71CHN8");
+					else
+				format = alGetEnumValue("AL_FORMAT_71CHN16");
+				if (!format)
+					printf("No Support for 8 Channel Playback!\n");
+				break;
+	}
     // create buffer
     alBufferData(m_buffer,
                  format,
@@ -217,7 +245,7 @@ bool cAudioBuffer::loadFromFile(const std::string& a_filename)
                               m_data,
                               &m_size, 
                               &m_frequency,
-                              &m_stereo,
+                              &m_channel_count,
                               &m_bitsPerSample);
     }
 
@@ -233,19 +261,47 @@ bool cAudioBuffer::loadFromFile(const std::string& a_filename)
     {
         // retrieve format
         ALenum format;
-        if (m_stereo)
-        {
-            if (m_bitsPerSample == 8)
-                format = AL_FORMAT_STEREO8;
-            else
-                format = AL_FORMAT_STEREO16;
-        }
-        else {
-            if (m_bitsPerSample == 8)
-                format = AL_FORMAT_MONO8;
-            else
-                format = AL_FORMAT_MONO16;
-        }
+ 	switch (m_channel_count)
+	{
+		case 1:	if (m_bitsPerSample == 8)
+					format = AL_FORMAT_MONO8;
+				else
+					format = AL_FORMAT_MONO16;
+				break;
+		case 2:	if (m_bitsPerSample == 8)
+				format = AL_FORMAT_STEREO8;
+					else
+				format = AL_FORMAT_STEREO16;
+				break;
+		case 4:	if (m_bitsPerSample == 8)
+				format = alGetEnumValue("AL_FORMAT_QUAD8");
+					else
+				format = alGetEnumValue("AL_FORMAT_QUAD16");
+				if (!format)
+					printf("No Support for 4 Channel Playback!\n");
+				break;
+		case 6:	if (m_bitsPerSample == 8)
+				format = alGetEnumValue("AL_FORMAT_51CHN8");
+					else
+				format = alGetEnumValue("AL_FORMAT_51CHN16");
+				if (!format)
+					printf("No Support for 6 Channel Playback!\n");
+				break;
+		case 7:	if (m_bitsPerSample == 8)
+				format = alGetEnumValue("AL_FORMAT_61CHN8");
+					else
+				format = alGetEnumValue("AL_FORMAT_61CHN16");
+				if (!format)
+					printf("No Support for 7 Channel Playback!\n");
+				break;
+		case 8:	if (m_bitsPerSample == 8)
+				format = alGetEnumValue("AL_FORMAT_71CHN8");
+					else
+				format = alGetEnumValue("AL_FORMAT_71CHN16");
+				if (!format)
+					printf("No Support for 8 Channel Playback!\n");
+				break;
+	}
 
         // assign data to the openAL buffer
         alBufferData(m_buffer, 
@@ -273,7 +329,7 @@ bool cAudioBuffer::loadFromFile(const std::string& a_filename)
 bool cAudioBuffer::convertToMono()
 {
     // wrong format
-    if (!m_stereo)
+    if (m_channel_count == 1)
     {
         return (C_ERROR);
     }
@@ -290,7 +346,7 @@ bool cAudioBuffer::convertToMono()
         }
 
         m_size = size;
-        m_stereo = false;
+		m_channel_count = 1;
 
         alBufferData(m_buffer, 
                      AL_FORMAT_MONO8,
@@ -312,7 +368,7 @@ bool cAudioBuffer::convertToMono()
         }
 
         m_size = size;
-        m_stereo = false;
+		m_channel_count = 1;
 
         alBufferData(m_buffer,
                      AL_FORMAT_MONO16,
@@ -348,7 +404,7 @@ bool cAudioBuffer::cleanup()
     m_filename = "";
     m_size = 0;
     m_frequency = 0;
-    m_stereo = false;
+	m_channel_count = 1;
     m_bitsPerSample = 8;
 
     // return success
@@ -368,7 +424,7 @@ int cAudioBuffer::getNumSamples()
 {
     int result = 0;
 
-    if (m_stereo)
+    if (m_channel_count == 2)
     {
         if (m_bitsPerSample == 8)
         {
@@ -422,7 +478,7 @@ short cAudioBuffer::getSampleLeft(const double a_time, const bool a_loop)
     }
 
     int index = 0;
-    if (m_stereo)
+    if (m_channel_count == 2)
     {
         if (m_bitsPerSample == 8)
         {
@@ -492,7 +548,7 @@ short cAudioBuffer::getSampleRight(const double a_time, const bool a_loop)
     }
 
     int index = 0;
-    if (m_stereo)
+    if (m_channel_count == 2)
     {
       if (m_bitsPerSample == 8)
       {

@@ -100,7 +100,7 @@ struct C_WAVE_Data
     \param  a_data           Returned pointer to audio data.
     \param  a_size           Returned number of samples contained in WAV file.
     \param  a_frequency      Returned sample frequency of WAV file.
-    \param  a_stereo         Returns __true__ if stereo, __false__ otherwise.
+    \param  channel_count    Returns the number of channels, valid answers are 1,2,4,6,7 and 8
     \param  a_bitsPerSample  Returned number of bits per sample (8 or 16).
 
     \return __true__ in case of success, __false__ otherwise.
@@ -110,7 +110,7 @@ bool cLoadFileWAV(const std::string& a_filename,
     unsigned char*& a_data,
     int* a_size,
     int* a_frequency,
-    bool* a_stereo,
+	unsigned short* channel_count,
     unsigned short* a_bitsPerSample)
 {
     FILE* soundFile = NULL;
@@ -205,16 +205,13 @@ bool cLoadFileWAV(const std::string& a_filename,
     // the format is worked out by looking at the number of
     // channels and the bits per sample.
     *a_bitsPerSample = wave_format.bitsPerSample;
-    if (wave_format.numChannels == 1) 
-    {
-        *a_stereo = false;
-    }
-    else if (wave_format.numChannels == 2) 
-    {
-        *a_stereo = true;
-    }
 
-    // close file
+    
+
+
+	*channel_count = wave_format.numChannels;
+
+	// close file
     fclose(soundFile);
 
     // return success
