@@ -43,6 +43,8 @@
 
 cmake_minimum_required (VERSION 3.0.0)
 project (CHAI3D)
+set (CHAI3D_VERSION_MAJOR 3)
+set (CHAI3D_VERSION_MINOR 2)
 
 # version info
 file (READ ${PROJECT_SOURCE_DIR}/src/version VERSION)
